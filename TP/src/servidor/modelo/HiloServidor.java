@@ -55,14 +55,12 @@ public class HiloServidor extends Thread {
 	private void inicializacionCliente() {
 		this.nombre = recibirMensaje();
 		if (servidor.estaDentro(nombre)) {
-			System.out.println(nombre + " esta adentro");
 			servidor.setSocket(nombre, cliente);
 		} else
 			servidor.meterCliente(this.nombre, this.cliente);
 	}
 
 	private void interpretarMensaje(String cadena) {
-		// System.out.println(nombre + " " + cadena);
 		String[] data = cadena.split(";");
 
 		switch (data[Constante.INSTRUCCION].trim()) {
@@ -128,7 +126,6 @@ public class HiloServidor extends Thread {
 	public void enviarCadena(String destinatario, String cadena) {
 		PrintWriter salida;
 		try {
-			System.out.println(servidor.getSocketCliente(destinatario));
 			salida = new PrintWriter(servidor.getSocketCliente(destinatario).getOutputStream(), true);
 			salida.println(cadena);
 		} catch (IOException e) {

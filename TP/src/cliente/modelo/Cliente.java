@@ -18,7 +18,7 @@ import util.Constante;
 public class Cliente extends Observable {
 	private String user;
 	private int port;
-	private Socket socket;
+	private Socket socket = null;
 	private boolean modoEscucha = true;
 	BufferedReader entradaMonitor;
 	BufferedReader entrada;
@@ -38,13 +38,11 @@ public class Cliente extends Observable {
 	// ------------------METODOS AVANZADOS--------------------//
 
 	public void registroServer(String ip, int port) throws IOException {
-		System.out.println("registra server");
+		if (socket != null)
+			socket.close();
 		this.socket = new Socket(ip, port);
-		System.out.println("crea socket");
 		this.entrada = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-		System.out.println("entrada");
 		this.salida = new PrintWriter(this.socket.getOutputStream(), true);
-		System.out.println("salida");
 		salida.println(this.user);
 		System.out.println("envia nombre");
 	}
@@ -151,6 +149,7 @@ public class Cliente extends Observable {
 					if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER)) {
 						System.out.println("cambia server");
 						registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_PRINCIPAL);
+						IniciaHiloCliente();
 					}
 				} while (cadena != null);
 			} catch (IOException e) {

@@ -54,16 +54,19 @@ public class Servidor {
 	}
 
 	public void recibirClientes() {
-		while (!server.isClosed()) {
-			try {
-				Socket socket = server.accept();
-				HiloServidor thread = new HiloServidor(socket, this);
-				thread.start();
-			} catch (IOException e) {
-				if (!server.isClosed())
-					e.printStackTrace();
+		new Thread(() -> {
+			while (!server.isClosed()) {
+				try {
+					Socket socket = server.accept();
+					HiloServidor thread = new HiloServidor(socket, this);
+					thread.start();
+				} catch (IOException e) {
+					if (!server.isClosed())
+						e.printStackTrace();
+				}
 			}
-		}
+		}).start();
+
 	}
 
 	public void setID() {
@@ -183,7 +186,6 @@ public class Servidor {
 			Boolean estado = dato.isDisponible();
 			clientes.add(nombre, null);
 			clientes.get(nombre).setDisponible(estado);
-			System.out.println(nombre + " " + clientes.get(nombre).isDisponible());
 		}
 	}
 

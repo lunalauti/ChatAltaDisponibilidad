@@ -67,11 +67,11 @@ public class ControladorServer implements ActionListener {
 		try {
 			servidor.closeServer();
 			servidor.setServer(new ServerSocket(Constante.PUERTO_PRINCIPAL));
-			servidor.setIdServer(1);
 			servidor.migrarDatos();
+			servidor.recibirClientes();
+			servidor.setIdServer(1);
 			servidor.sincronizarServer();
 			servidor.heartbeat();
-			servidor.recibirClientes();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

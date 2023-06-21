@@ -125,7 +125,6 @@ public class Monitor {
 				while (!serverCliente.isClosed()) {
 					Socket socket = serverCliente.accept();
 					clientes.add(socket);
-					System.out.println("incluyo " + socket);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -141,14 +140,14 @@ public class Monitor {
 			secundario = null;
 			salidaPrincipal = new PrintWriter(principal.getOutputStream(), true);
 			salidaPrincipal.println(Constante.COMANDO_CAMBIAR_SERVER);
-			System.out.println("entra");
+			Thread.sleep(2000);
 			for (Socket socket : clientes) {
 				System.out.println(socket);
 				salidaCliente = new PrintWriter(socket.getOutputStream(), true);
 				salidaCliente.println(Constante.COMANDO_CAMBIAR_SERVER);
 			}
 
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			System.out.println("Ocurrio un problema en el cambio de servidor");
 		}
 	}
