@@ -38,4 +38,8 @@ public class ListaClientes {
 		mapaClientes.get(cliente).setSocket(socket);
 	}
 
+	public void clear() {
+		mapaClientes.clear();
+	}
+
 }

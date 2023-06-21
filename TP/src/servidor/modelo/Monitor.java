@@ -103,20 +103,16 @@ public class Monitor {
 				while (true) {
 					String idServer = entrada.readLine();
 					System.out.println("Servidor " + idServer + "\t disponible");
-					if (idServer.equalsIgnoreCase("1") && serverActivo != 1) {
-						cambiarServer();
-					}
 				}
 			} catch (SocketTimeoutException | SocketException e) {
 				System.out.println("Falla de server detectada");
-				principal = null;
-				if (secundario != null)
+				if (secundario != null) {
 					cambiarServer();
-				else
+					recibirHeartbeat(principal);
+				} else
 					System.out.println("No se encontro un servidor de respaldo :(");
 				recibirServidores();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}).start();
@@ -140,23 +136,17 @@ public class Monitor {
 		try {
 			String comando;
 			PrintWriter salidaCliente;
-			if (principal == null) {
-				comando = Constante.COMANDO_CAMBIAR_SERVER_SECUNDARIO;
-				System.out.println("Cambiando a servidor secundario..");
-				salidaSecundario.println(comando);
-			} else {
-				comando = Constante.COMANDO_CAMBIAR_SERVER_PRINCIPAL;
-				System.out.println("Cambiando a servidor principal..");
-				salidaPrincipal.println(comando);
-			}
-			for (Socket socket : clientes) {
-				System.out.println("enviando a cliente");
-				salidaCliente = new PrintWriter(socket.getOutputStream(), true);
-				salidaCliente.println(comando);
-			}
-		} catch (
+			principal = secundario;
+			secundario = null;
+			salidaPrincipal = new PrintWriter(principal.getOutputStream(), true);
+			salidaPrincipal.println(Constante.COMANDO_CAMBIAR_SERVER);
 
-		IOException e) {
+			for (Socket socket : clientes) {
+				salidaCliente = new PrintWriter(socket.getOutputStream(), true);
+				salidaCliente.println(Constante.COMANDO_CAMBIAR_SERVER);
+			}
+
+		} catch (IOException e) {
 			System.out.println("Ocurrio un problema en el cambio de servidor");
 		}
 	}

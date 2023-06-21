@@ -17,8 +17,7 @@ public abstract class Constante {
 	public static final String COMANDO_ACEPTAR = "/aceptar/";
 	public static final String COMANDO_RECHAZAR = "/rechazar/";
 	public static final String COMANDO_MODO_ESCUCHA = "/modoescucha/";
-	public static final String COMANDO_CAMBIAR_SERVER_SECUNDARIO = "/cambiarserversecundario/";
-	public static final String COMANDO_CAMBIAR_SERVER_PRINCIPAL = "/cambiarserversecundario/";
+	public static final String COMANDO_CAMBIAR_SERVER = "/cambiarserver/";
 	public static final String FIN_CADENA = "/fin/";
 
 	// -----------------INDICES-----------------//

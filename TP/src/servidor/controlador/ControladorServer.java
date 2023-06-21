@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.BindException;
+import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import javax.swing.JOptionPane;
@@ -60,6 +61,20 @@ public class ControladorServer implements ActionListener {
 
 	public void actualizarConectados() {
 		vista.actualizarCant(String.valueOf(servidor.getClientesConectados()));
+	}
+
+	public void cambiarServer() {
+		try {
+			servidor.closeServer();
+			servidor.setServer(new ServerSocket(Constante.PUERTO_PRINCIPAL));
+			servidor.setIdServer(1);
+			servidor.migrarDatos();
+			servidor.sincronizarServer();
+			servidor.heartbeat();
+			servidor.recibirClientes();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// ------------------------SETTERS------------------------//

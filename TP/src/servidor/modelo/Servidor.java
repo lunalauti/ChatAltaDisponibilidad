@@ -135,7 +135,6 @@ public class Servidor {
 			for (HashMap.Entry<String, SocketCliente> entry : clientes.getMapaClientes().entrySet()) {
 				entry.getValue().getSocket().close();
 			}
-			notificar("Cerrando servidor...\n");
 			server.close();
 
 		} catch (IOException e) {
@@ -177,25 +176,15 @@ public class Servidor {
 		}
 	}
 
-	public void iniciarServidorSecundario() {
+	public void migrarDatos() {
+		clientes.clear();
 		for (Datos dato : datos) {
 			String nombre = dato.getNombre();
 			Boolean estado = dato.isDisponible();
 			clientes.add(nombre, null);
 			clientes.get(nombre).setDisponible(estado);
+			System.out.println(nombre + " " + clientes.get(nombre).isDisponible());
 		}
-		while (!server.isClosed()) {
-			try {
-				Socket socket = server.accept();
-				System.out.println("cliente nuevo");
-				HiloServidor thread = new HiloServidor(socket, this);
-				thread.start();
-			} catch (IOException e) {
-				if (!server.isClosed())
-					e.printStackTrace();
-			}
-		}
-
 	}
 
 	// ------------------METODOS MONITOR--------------------//
@@ -215,11 +204,8 @@ public class Servidor {
 			String cadena;
 			do {
 				cadena = recibirCadenaMonitor();
-				if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_SECUNDARIO)) {
-					iniciarServidorSecundario();
-				} else if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_PRINCIPAL)) {
-					// volver a servidor principal: tendría que pasar del secundario al principal
-					// toda la info nuevamente
+				if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER)) {
+					controlador.cambiarServer();
 				}
 			} while (!monitor.isClosed());
 		}).start();
@@ -312,6 +298,14 @@ public class Servidor {
 
 	public ArrayList<String> getHistorial() {
 		return historial;
+	}
+
+	public void setServer(ServerSocket server) {
+		this.server = server;
+	}
+
+	public void setIdServer(int idServer) {
+		this.idServer = idServer;
 	}
 
 }

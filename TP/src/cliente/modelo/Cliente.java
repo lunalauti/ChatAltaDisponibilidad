@@ -144,10 +144,8 @@ public class Cliente extends Observable {
 				do {
 					cadena = recibirCadenaMonitor();
 					System.out.println("recibe cadena monitor");
-					if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_SECUNDARIO)) {
+					if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER)) {
 						System.out.println("cambia server");
-						registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_SECUNDARIO);
-					} else if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_PRINCIPAL)) {
 						registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_PRINCIPAL);
 					}
 				} while (cadena != null);
