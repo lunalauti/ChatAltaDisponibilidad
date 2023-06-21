@@ -1,33 +1,27 @@
 package vista;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-import javax.swing.JLabel;
-import javax.swing.JTextPane;
-import javax.swing.JTextField;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import util.Constante;
-
-import javax.swing.border.EtchedBorder;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import javax.swing.SwingConstants;
-import java.awt.Canvas;
-import javax.swing.JCheckBox;
-import java.awt.Font;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.KeyEvent;
 
 @SuppressWarnings("deprecation")
 public class VInicio extends JFrame implements IInicio, MouseListener, KeyListener {

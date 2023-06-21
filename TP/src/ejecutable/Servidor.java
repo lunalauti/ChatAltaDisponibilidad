@@ -1,10 +1,10 @@
 package ejecutable;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.JOptionPane;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import controlador.ControladorServer;
 import modelo.Datos;
@@ -24,14 +28,15 @@ public class Servidor {
 	private Socket monitor;
 	private int idServer;
 	private ServerSocket server = null;
+	private Socket socketSincronizacion;
 	private ListaClientes clientes = new ListaClientes();
 	private ControladorServer controlador;
 	private BufferedReader entradaMonitor;
 	private PrintWriter salidaMonitor;
-	private ObjectInputStream entradaSincronizacion = null;
-	private ObjectOutputStream salidaSincronizacion = null;
+	private DataInputStream entradaSincronizacion = null;
+	private DataOutputStream salidaSincronizacion = null;
 	private ArrayList<String> historial = new ArrayList<String>();
-	private HashMap<String, Datos> datos = new HashMap<String, Datos>();
+	private ArrayList<Datos> datos = new ArrayList<Datos>();
 
 	// ------------------EJECUTABLE--------------------//
 	public static void main(String[] args) {
@@ -79,13 +84,13 @@ public class Servidor {
 				switch (this.idServer) {
 				case 1:
 					ServerSocket server = new ServerSocket(Constante.PUERTO_SINCRONIZACION);
-					socket = server.accept();
-					salidaSincronizacion = new ObjectOutputStream(socket.getOutputStream());
+					socketSincronizacion = server.accept();
+					salidaSincronizacion = new DataOutputStream(socketSincronizacion.getOutputStream());
 					notificar("Sincronizado con servidor secundario\n");
 					break;
 				case 2:
-					socket = new Socket(Constante.IP_SERVIDOR, Constante.PUERTO_SINCRONIZACION);
-					entradaSincronizacion = new ObjectInputStream(socket.getInputStream());
+					socketSincronizacion = new Socket(Constante.IP_SERVIDOR, Constante.PUERTO_SINCRONIZACION);
+					entradaSincronizacion = new DataInputStream(socketSincronizacion.getInputStream());
 					recibirActualizacion();
 					notificar("Sincronizado con servidor principal\n");
 					break;
@@ -99,26 +104,29 @@ public class Servidor {
 
 	public void resincronizarEstado() {
 		try {
-			if (salidaSincronizacion != null)
-				salidaSincronizacion.writeObject(datos);
+			if (!socketSincronizacion.isClosed()) {
+				JSONArray datosJson = getJsonArray();
+				System.out.println("principal " + datosJson.length());
+				salidaSincronizacion.writeUTF(datosJson.toString());
+			}
 		} catch (IOException e) {
 			notificar("Fallo en la sincronizacion detectado\n");
 		}
 
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void recibirActualizacion() {
-		System.out.println("entra");
 		new Thread(() -> {
 			try {
-				if (entradaSincronizacion != null) {
-					while (true) {
-						this.datos = (HashMap<String, Datos>) entradaSincronizacion.readObject();
-						controlador.actualizarConectados();
-					}
+				while (!socketSincronizacion.isClosed() && entradaSincronizacion != null) {
+					String jsonStr = entradaSincronizacion.readUTF();
+					JSONArray jsonArray = new JSONArray(jsonStr);
+					cargarDatos(jsonArray);
+					System.out.println(jsonArray.length());
+					controlador.actualizarConectados();
 				}
-			} catch (IOException | ClassNotFoundException e) {
+			} catch (IOException | JSONException e) {
 				e.printStackTrace();
 			}
 		}).start();
@@ -142,7 +150,7 @@ public class Servidor {
 	public void meterCliente(String user, Socket socket) {
 		clientes.add(user, socket);
 		notificar(user + " inicio sesion\n");
-		datos.put(user, new Datos(user));
+		datos.add(new Datos(user));
 		controlador.actualizarConectados();
 		resincronizarEstado();
 	}
@@ -150,14 +158,28 @@ public class Servidor {
 	public void quitarCliente(String cliente) {
 		clientes.remove(cliente);
 		notificar(cliente + " finalizo su sesion\n");
-		datos.remove(cliente);
-		resincronizarEstado();
+		datos.remove(getIndex(cliente));
 		controlador.actualizarConectados();
 	}
 
 	public void notificar(String notificacion) {
 		this.historial.add(notificacion);
 		controlador.notificar();
+	}
+
+	private void cargarDatos(JSONArray jsonArray) {
+		datos.clear();
+		try {
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject dato = jsonArray.getJSONObject(i);
+				String nombre = dato.getString("nombre");
+				Boolean disponible = dato.getBoolean("disponible");
+				datos.add(new Datos(nombre, disponible));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	// ------------------METODOS MONITOR--------------------//
@@ -168,7 +190,7 @@ public class Servidor {
 			entradaMonitor = new BufferedReader(new InputStreamReader(monitor.getInputStream()));
 			salidaMonitor = new PrintWriter(monitor.getOutputStream(), true);
 		} catch (IOException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "No se puede iniciar el servidor :(");
 		}
 	}
 
@@ -215,6 +237,13 @@ public class Servidor {
 		}
 	}
 
+	public JSONArray getJsonArray() {
+		JSONArray jsonDatos = new JSONArray();
+		for (Datos dato : datos)
+			jsonDatos.put(dato.getJSONObject());
+		return jsonDatos;
+	}
+
 	// ------------------GETTERS--------------------//
 	public ListaClientes getClientes() {
 		return clientes;
@@ -241,7 +270,17 @@ public class Servidor {
 	}
 
 	public void setEstado(String user, boolean estado) {
-		datos.get(user).setDisponible(estado);
+		datos.get(getIndex(user)).setDisponible(estado);
+	}
+
+	public int getIndex(String cliente) {
+		int i = 0;
+		while (!datos.get(i).getNombre().equalsIgnoreCase(cliente) && i < datos.size()) {
+			i++;
+		}
+		if (i >= datos.size())
+			i = -1;
+		return i;
 	}
 
 	public ArrayList<String> getHistorial() {

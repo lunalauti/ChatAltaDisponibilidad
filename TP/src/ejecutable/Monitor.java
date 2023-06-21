@@ -96,20 +96,13 @@ public class Monitor {
 				BufferedReader entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				while (true) {
 					String idServer = entrada.readLine();
-					System.out.println("Servidor " + idServer + ":\t disponible");
+					System.out.println("Servidor " + idServer + "\t disponible");
 					if (idServer.equalsIgnoreCase("1") && serverActivo != 1) {
 						// cambiarServer();
 					}
 				}
-			} catch (SocketTimeoutException e) {
-				System.out.println("Falla de server detectada");
-//				if (this.secundario != null)
-//					cambiarServer();
-//				else
-//					System.out.println("No se encontro servidor secundario :(");
-
 			} catch (IOException e) {
-
+				System.out.println("Falla de server detectada");
 			}
 		}).start();
 	}

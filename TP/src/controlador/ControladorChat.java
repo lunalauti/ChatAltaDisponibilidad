@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import modelo.Chat;
-import modelo.Mensaje;
 import util.Constante;
 import vista.IChat;
 import vista.VInicio;

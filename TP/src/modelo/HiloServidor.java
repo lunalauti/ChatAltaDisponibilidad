@@ -34,7 +34,6 @@ public class HiloServidor extends Thread {
 			do {
 				cadena = recibirMensaje();
 				interpretarMensaje(cadena);
-				servidor.resincronizarEstado();
 			} while (!cadena.equals(Constante.COMANDO_FIN) && !this.cliente.isClosed()
 					&& !this.servidor.getServer().isClosed());
 			this.entrada.close();
@@ -42,6 +41,7 @@ public class HiloServidor extends Thread {
 			if (!cliente.isClosed())
 				this.cliente.close();
 			servidor.quitarCliente(nombre);
+			servidor.resincronizarEstado();
 
 		} catch (SocketTimeoutException e) {
 			// ACA SE DEBERIA AVISAR AL OTRO CHAT QUE FINALIZO?

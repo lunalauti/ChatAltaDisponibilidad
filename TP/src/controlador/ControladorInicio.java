@@ -7,7 +7,6 @@ import javax.swing.JOptionPane;
 
 import ejecutable.Cliente;
 import modelo.Chat;
-import modelo.Mensaje;
 import util.Constante;
 import vista.IInicio;
 import vista.VChat;
