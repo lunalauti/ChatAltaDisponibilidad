@@ -1,4 +1,4 @@
-package modelo;
+package servidor.modelo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
-import ejecutable.Servidor;
 import util.Constante;
 
 public class HiloServidor extends Thread {
@@ -34,6 +33,7 @@ public class HiloServidor extends Thread {
 			do {
 				cadena = recibirMensaje();
 				interpretarMensaje(cadena);
+				servidor.resincronizarEstado();
 			} while (!cadena.equals(Constante.COMANDO_FIN) && !this.cliente.isClosed()
 					&& !this.servidor.getServer().isClosed());
 			this.entrada.close();
@@ -43,13 +43,7 @@ public class HiloServidor extends Thread {
 			servidor.quitarCliente(nombre);
 			servidor.resincronizarEstado();
 
-		} catch (SocketTimeoutException e) {
-			// ACA SE DEBERIA AVISAR AL OTRO CHAT QUE FINALIZO?
-			// Servidor.imprimirTodos("<SERVER> "+nombre+" se ha caído (connection
-			// timeout).");
-			// Servidor.sacarCliente(nombre);
 		} catch (IOException e) {
-			// Servidor.imprimirTodos("<SERVER> "+nombre+" finalizo la sesion.");
 		}
 	}
 
@@ -60,7 +54,10 @@ public class HiloServidor extends Thread {
 	 */
 	private void inicializacionCliente() {
 		this.nombre = recibirMensaje();
-		servidor.meterCliente(this.nombre, this.cliente);
+		if (servidor.estaDentro(nombre)) {
+			servidor.setSocket(nombre, cliente);
+		} else
+			servidor.meterCliente(this.nombre, this.cliente);
 	}
 
 	private void interpretarMensaje(String cadena) {

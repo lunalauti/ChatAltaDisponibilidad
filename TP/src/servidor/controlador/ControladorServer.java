@@ -1,4 +1,4 @@
-package controlador;
+package servidor.controlador;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,9 +8,9 @@ import java.net.UnknownHostException;
 
 import javax.swing.JOptionPane;
 
-import ejecutable.Servidor;
+import servidor.modelo.Servidor;
+import servidor.vista.VServer;
 import util.Constante;
-import vista.VServer;
 
 @SuppressWarnings("static-access")
 public class ControladorServer implements ActionListener {
@@ -26,15 +26,12 @@ public class ControladorServer implements ActionListener {
 			settearVista();
 			servidor.notificar("Servidor " + servidor.getIdServer() + " iniciado\n");
 			servidor.sincronizarServer();
-			switch (servidor.getIdServer()) {
-			case 1:
+			servidor.escucharMonitor();
+			if (servidor.getIdServer() == 1) {
 				servidor.heartbeat();
-				break;
-			case 2:
-				servidor.escucharMonitor();
-				break;
+				servidor.recibirClientes();
 			}
-			servidor.recibirClientes();
+
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (BindException e) {

@@ -6,9 +6,8 @@ public abstract class Constante {
 	public static int PUERTO_PRINCIPAL = 5000;
 	public static int PUERTO_SECUNDARIO = 5001;
 	public static int PUERTO_SINCRONIZACION = 5002;
-	public static int PUERTO_CLIENTE = 5003;
+	public static int PUERTO_MONITOR_CLIENTE = 5003;
 	public static int PUERTO_MONITOR = 5004;
-	public static int PUERTO_HEARTBEAT = 5005;
 
 	// -----------------COMANDOS-----------------//
 	public static final String COMANDO_FIN = "/fin/"; // para finalizar conexion cliente-servidor
@@ -18,13 +17,16 @@ public abstract class Constante {
 	public static final String COMANDO_ACEPTAR = "/aceptar/";
 	public static final String COMANDO_RECHAZAR = "/rechazar/";
 	public static final String COMANDO_MODO_ESCUCHA = "/modoescucha/";
-	public static final String COMANDO_CAMBIAR_SERVER = "/cambiarserver/";
+	public static final String COMANDO_CAMBIAR_SERVER_SECUNDARIO = "/cambiarserversecundario/";
+	public static final String COMANDO_CAMBIAR_SERVER_PRINCIPAL = "/cambiarserversecundario/";
 	public static final String FIN_CADENA = "/fin/";
+
 	// -----------------INDICES-----------------//
 	public static final int INSTRUCCION = 0;
 	public static final int DESTINATARIO = 1;
 	public static final int CLAVE = 2;
 	public static final int MENSAJE = 2;
+
 	// -----------------BOTONES-----------------//
 	public static final String BOTON_INICIAR = "/iniciar/";
 	public static final String BOTON_INICIAR_SESION = "/iniciarsesion/";

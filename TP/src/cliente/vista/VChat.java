@@ -1,4 +1,4 @@
-package vista;
+package cliente.vista;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import modelo.Mensaje;
+import cliente.modelo.Mensaje;
 import util.Constante;
 
 public class VChat extends JFrame implements IChat {

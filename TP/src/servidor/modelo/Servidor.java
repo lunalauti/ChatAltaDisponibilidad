@@ -1,4 +1,4 @@
-package ejecutable;
+package servidor.modelo;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -17,11 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import controlador.ControladorServer;
-import modelo.Datos;
-import modelo.HiloServidor;
-import modelo.ListaClientes;
-import modelo.SocketCliente;
+import servidor.controlador.ControladorServer;
 import util.Constante;
 
 public class Servidor {
@@ -77,9 +73,9 @@ public class Servidor {
 		}
 	}
 
+	// ------------------METODOS REDUNDANCIA--------------------//
 	public void sincronizarServer() {
 		new Thread(() -> {
-			Socket socket;
 			try {
 				switch (this.idServer) {
 				case 1:
@@ -104,18 +100,16 @@ public class Servidor {
 
 	public void resincronizarEstado() {
 		try {
-			if (!socketSincronizacion.isClosed()) {
+			if (socketSincronizacion != null && !socketSincronizacion.isClosed()) {
 				JSONArray datosJson = getJsonArray();
-				System.out.println("principal " + datosJson.length());
 				salidaSincronizacion.writeUTF(datosJson.toString());
 			}
 		} catch (IOException e) {
-			notificar("Fallo en la sincronizacion detectado\n");
+			notificar("Hubo un error en la resincronizacion de estado\n");
 		}
 
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void recibirActualizacion() {
 		new Thread(() -> {
 			try {
@@ -123,7 +117,6 @@ public class Servidor {
 					String jsonStr = entradaSincronizacion.readUTF();
 					JSONArray jsonArray = new JSONArray(jsonStr);
 					cargarDatos(jsonArray);
-					System.out.println(jsonArray.length());
 					controlador.actualizarConectados();
 				}
 			} catch (IOException | JSONException e) {
@@ -179,6 +172,25 @@ public class Servidor {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void iniciarServidorSecundario() {
+		for (Datos dato : datos) {
+			String nombre = dato.getNombre();
+			Boolean estado = dato.isDisponible();
+			clientes.add(nombre, null);
+			clientes.get(nombre).setDisponible(estado);
+		}
+		while (!server.isClosed()) {
+			try {
+				Socket socket = server.accept();
+				HiloServidor thread = new HiloServidor(socket, this);
+				thread.start();
+			} catch (IOException e) {
+				if (!server.isClosed())
+					e.printStackTrace();
+			}
+		}
 
 	}
 
@@ -199,8 +211,11 @@ public class Servidor {
 			String cadena;
 			do {
 				cadena = recibirCadenaMonitor();
-				if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER)) {
-					// controlador.cambiarServer();
+				if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_SECUNDARIO)) {
+					iniciarServidorSecundario();
+				} else if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_PRINCIPAL)) {
+					// volver a servidor principal: tendría que pasar del secundario al principal
+					// toda la info nuevamente
 				}
 			} while (!monitor.isClosed());
 		}).start();
@@ -263,6 +278,14 @@ public class Servidor {
 
 	public int getClientesConectados() {
 		return datos.size();
+	}
+
+	public boolean estaDentro(String cliente) {
+		return clientes.estaDentro(cliente);
+	}
+
+	public void setSocket(String cliente, Socket socket) {
+		clientes.get(cliente).setSocket(socket);
 	}
 
 	public void setControlador(ControladorServer controlador) {

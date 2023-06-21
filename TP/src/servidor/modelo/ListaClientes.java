@@ -1,4 +1,4 @@
-package modelo;
+package servidor.modelo;
 
 import java.net.Socket;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ public class ListaClientes {
 	public SocketCliente get(String cliente) {
 		return mapaClientes.get(cliente);
 	}
-	
+
 	public boolean isDisponible(String nombre) {
 		return mapaClientes.get(nombre).isDisponible();
 	}
@@ -33,6 +33,9 @@ public class ListaClientes {
 	public HashMap<String, SocketCliente> getMapaClientes() {
 		return mapaClientes;
 	}
-	
-	
+
+	public void setSocket(String cliente, Socket socket) {
+		mapaClientes.get(cliente).setSocket(socket);
+	}
+
 }

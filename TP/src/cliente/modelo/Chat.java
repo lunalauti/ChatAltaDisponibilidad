@@ -1,4 +1,4 @@
-package modelo;
+package cliente.modelo;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -6,7 +6,6 @@ import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-import ejecutable.Cliente;
 import util.Constante;
 
 public class Chat {

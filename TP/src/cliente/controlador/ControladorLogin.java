@@ -1,15 +1,16 @@
-package controlador;
+package cliente.controlador;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
-import ejecutable.Cliente;
+import cliente.modelo.Cliente;
+import cliente.vista.ILogin;
+import cliente.vista.VInicio;
+import cliente.vista.VLogin;
 import util.Constante;
-import vista.ILogin;
-import vista.VInicio;
-import vista.VLogin;
 
 public class ControladorLogin implements ActionListener {
 	ILogin vista;
@@ -30,12 +31,17 @@ public class ControladorLogin implements ActionListener {
 		String nombre = vista.getNombre();
 		Integer puerto = vista.getPuerto();
 		Cliente cliente = new Cliente(nombre, puerto);
-		if (cliente.registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_PRINCIPAL)) {
+		try {
+			cliente.registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_PRINCIPAL);
+			cliente.conectarMonitor();
+			cliente.escucharMonitor();
+
 			this.vista.cerrarse();
 			ControladorInicio.getInstance().setVista(new VInicio());
 			ControladorInicio.getInstance().setCliente(cliente);
-		} else
+		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "No se puede iniciar sesion :(");
+		}
 	}
 
 	public void setVista(ILogin vista) {

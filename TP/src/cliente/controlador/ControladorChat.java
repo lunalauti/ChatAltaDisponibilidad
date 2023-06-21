@@ -1,12 +1,12 @@
-package controlador;
+package cliente.controlador;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import modelo.Chat;
+import cliente.modelo.Chat;
+import cliente.vista.IChat;
+import cliente.vista.VInicio;
 import util.Constante;
-import vista.IChat;
-import vista.VInicio;
 
 public class ControladorChat implements ActionListener {
 	private Chat chat;

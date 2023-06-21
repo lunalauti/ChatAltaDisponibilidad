@@ -1,4 +1,4 @@
-package modelo;
+package servidor.modelo;
 
 import java.io.Serializable;
 

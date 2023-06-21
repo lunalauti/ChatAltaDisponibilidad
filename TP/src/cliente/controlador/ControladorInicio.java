@@ -1,16 +1,16 @@
-package controlador;
+package cliente.controlador;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JOptionPane;
 
-import ejecutable.Cliente;
-import modelo.Chat;
+import cliente.modelo.Chat;
+import cliente.modelo.Cliente;
+import cliente.vista.IInicio;
+import cliente.vista.VChat;
+import cliente.vista.VLogin;
 import util.Constante;
-import vista.IInicio;
-import vista.VChat;
-import vista.VLogin;
 
 @SuppressWarnings("deprecation")
 public class ControladorInicio implements ActionListener {

@@ -1,4 +1,4 @@
-package modelo;
+package servidor.modelo;
 
 import java.net.Socket;
 
@@ -21,6 +21,10 @@ public class SocketCliente {
 
 	public Socket getSocket() {
 		return socket;
+	}
+
+	public void setSocket(Socket socket) {
+		this.socket = socket;
 	}
 
 	public SocketCliente(String user, Socket socket) {

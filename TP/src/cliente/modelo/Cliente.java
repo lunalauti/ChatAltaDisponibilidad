@@ -1,4 +1,4 @@
-package ejecutable;
+package cliente.modelo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,9 +9,9 @@ import java.util.Observable;
 
 import javax.swing.JOptionPane;
 
-import controlador.ControladorChat;
-import controlador.ControladorInicio;
-import controlador.ControladorLogin;
+import cliente.controlador.ControladorChat;
+import cliente.controlador.ControladorInicio;
+import cliente.controlador.ControladorLogin;
 import util.Constante;
 
 @SuppressWarnings("deprecation")
@@ -20,6 +20,7 @@ public class Cliente extends Observable {
 	private int port;
 	private Socket socket;
 	private boolean modoEscucha = true;
+	BufferedReader entradaMonitor;
 	BufferedReader entrada;
 	PrintWriter salida;
 
@@ -36,21 +37,11 @@ public class Cliente extends Observable {
 
 	// ------------------METODOS AVANZADOS--------------------//
 
-	/*
-	 * Devuelve true si registra correctamente al cliente en el servidor
-	 */
-	public boolean registroServer(String ip, int port) {
-		boolean resp;
-		try {
-			this.socket = new Socket(ip, port);
-			this.entrada = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-			this.salida = new PrintWriter(this.socket.getOutputStream(), true);
-			salida.println(this.user);
-			resp = true;
-		} catch (IOException e) {
-			resp = false;
-		}
-		return resp;
+	public void registroServer(String ip, int port) throws IOException {
+		this.socket = new Socket(ip, port);
+		this.entrada = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+		this.salida = new PrintWriter(this.socket.getOutputStream(), true);
+		salida.println(this.user);
 	}
 
 	public void IniciaHiloCliente() {
@@ -58,13 +49,10 @@ public class Cliente extends Observable {
 			try {
 				String cadena;
 				do {
-					// System.out.println(this.user + ":esperando cadena");
 					cadena = recibirCadena();
-					// System.out.println(this.user + " recibio " + cadena);
 					if (cadena != null)
 						interpretarMensaje(cadena.trim());
 				} while (cadena != null && !socket.isClosed());
-				// System.out.println("salio");
 				entrada.close();
 				salida.close();
 				if (!socket.isClosed())
@@ -132,6 +120,44 @@ public class Cliente extends Observable {
 	public void cambiarModoEscucha() {
 		enviarCadena(Constante.COMANDO_MODO_ESCUCHA);
 
+	}
+
+	// ------------------METODOS MONITOR--------------------//
+	public void conectarMonitor() {
+		try {
+			Socket monitor = new Socket(Constante.IP_SERVIDOR, Constante.PUERTO_MONITOR_CLIENTE);
+			entradaMonitor = new BufferedReader(new InputStreamReader(monitor.getInputStream()));
+		} catch (IOException e) {
+
+		}
+	}
+
+	public void escucharMonitor() {
+		new Thread(() -> {
+			String cadena;
+			try {
+				while (true) {
+					cadena = recibirCadenaMonitor();
+					if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_SECUNDARIO)) {
+						registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_SECUNDARIO);
+					} else if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_PRINCIPAL)) {
+						registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_PRINCIPAL);
+					}
+				}
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "Hubo un error al cambiar de servidor");
+			}
+		}).start();
+	}
+
+	public String recibirCadenaMonitor() {
+		String cadena = null;
+		try {
+			cadena = entradaMonitor.readLine();
+		} catch (IOException e) {
+			cadena = null;
+		}
+		return cadena;
 	}
 
 	// ------------------METODOS BASICOS--------------------//
