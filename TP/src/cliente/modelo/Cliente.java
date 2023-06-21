@@ -38,6 +38,7 @@ public class Cliente extends Observable {
 	// ------------------METODOS AVANZADOS--------------------//
 
 	public void registroServer(String ip, int port) throws IOException {
+		System.out.println("registra server");
 		this.socket = new Socket(ip, port);
 		this.entrada = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 		this.salida = new PrintWriter(this.socket.getOutputStream(), true);
@@ -64,7 +65,6 @@ public class Cliente extends Observable {
 	}
 
 	public void interpretarMensaje(String cadena) {
-		// System.out.println("interpretar " + cadena);
 		String[] mensaje = cadena.split(";");
 		switch (mensaje[Constante.INSTRUCCION].trim()) {
 
@@ -111,6 +111,11 @@ public class Cliente extends Observable {
 
 	public void finalizarConexion() {
 		enviarCadena(Constante.COMANDO_FIN);
+		try {
+			entradaMonitor.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void desconectarChat(String userDest) {
@@ -136,14 +141,16 @@ public class Cliente extends Observable {
 		new Thread(() -> {
 			String cadena;
 			try {
-				while (true) {
+				do {
 					cadena = recibirCadenaMonitor();
+					System.out.println("recibe cadena monitor");
 					if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_SECUNDARIO)) {
+						System.out.println("cambia server");
 						registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_SECUNDARIO);
 					} else if (cadena.equalsIgnoreCase(Constante.COMANDO_CAMBIAR_SERVER_PRINCIPAL)) {
 						registroServer(Constante.IP_SERVIDOR, Constante.PUERTO_PRINCIPAL);
 					}
-				}
+				} while (cadena != null);
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(null, "Hubo un error al cambiar de servidor");
 			}

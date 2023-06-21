@@ -150,7 +150,8 @@ public class Monitor {
 				salidaPrincipal.println(comando);
 			}
 			for (Socket socket : clientes) {
-				salidaCliente = new PrintWriter(this.secundario.getOutputStream(), true);
+				System.out.println("enviando a cliente");
+				salidaCliente = new PrintWriter(socket.getOutputStream(), true);
 				salidaCliente.println(comando);
 			}
 		} catch (

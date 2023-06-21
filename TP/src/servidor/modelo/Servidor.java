@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -100,7 +101,7 @@ public class Servidor {
 
 	public void resincronizarEstado() {
 		try {
-			if (socketSincronizacion != null && !socketSincronizacion.isClosed()) {
+			if (socketSincronizacion != null && !socketSincronizacion.isClosed() && salidaSincronizacion != null) {
 				JSONArray datosJson = getJsonArray();
 				salidaSincronizacion.writeUTF(datosJson.toString());
 			}
@@ -119,6 +120,8 @@ public class Servidor {
 					cargarDatos(jsonArray);
 					controlador.actualizarConectados();
 				}
+			} catch (SocketException e) {
+
 			} catch (IOException | JSONException e) {
 				e.printStackTrace();
 			}
@@ -184,6 +187,7 @@ public class Servidor {
 		while (!server.isClosed()) {
 			try {
 				Socket socket = server.accept();
+				System.out.println("cliente nuevo");
 				HiloServidor thread = new HiloServidor(socket, this);
 				thread.start();
 			} catch (IOException e) {
