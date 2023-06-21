@@ -74,7 +74,7 @@ public class Cliente extends Observable {
 			if (modoEscucha == false)
 				break;
 			String userDest = mensaje[Constante.DESTINATARIO];
-			int option = JOptionPane.showConfirmDialog(null, "Â¿Deseas aceptar la conexion de " + userDest + "?",
+			int option = JOptionPane.showConfirmDialog(null, "¿Deseas aceptar la conexion de " + userDest + "?",
 					"Confirmacion", JOptionPane.YES_NO_OPTION);
 
 			if (option == JOptionPane.YES_OPTION) {
@@ -113,11 +113,6 @@ public class Cliente extends Observable {
 
 	public void finalizarConexion() {
 		enviarCadena(Constante.COMANDO_FIN);
-		try {
-			entradaMonitor.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void desconectarChat(String userDest) {

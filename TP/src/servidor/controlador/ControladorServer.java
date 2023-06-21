@@ -50,7 +50,7 @@ public class ControladorServer implements ActionListener {
 		String comando = e.getActionCommand();
 		if (comando.equalsIgnoreCase(Constante.BOTON_APAGAR)) {
 			int option = JOptionPane.showConfirmDialog(null,
-					"¿Seguro que desea apagar el servidor? Ningun dato quedara almacenado", "Confirmación",
+					"�Seguro que desea apagar el servidor? Ningun dato quedara almacenado", "Confirmacion",
 					JOptionPane.YES_NO_OPTION);
 			if (option == JOptionPane.YES_OPTION) {
 				servidor.closeServer();
@@ -65,6 +65,7 @@ public class ControladorServer implements ActionListener {
 
 	public void cambiarServer() {
 		try {
+			servidor.notificar("///// Establecido como nuevo servidor principal /////");
 			servidor.closeServer();
 			servidor.setServer(new ServerSocket(Constante.PUERTO_PRINCIPAL));
 			servidor.migrarDatos();
@@ -72,6 +73,9 @@ public class ControladorServer implements ActionListener {
 			servidor.setIdServer(1);
 			servidor.sincronizarServer();
 			servidor.heartbeat();
+			vista.settearDatos(String.valueOf(this.servidor.getServer().getInetAddress().getLocalHost()),
+					String.valueOf(this.servidor.getServer().getLocalPort()),
+					String.valueOf(this.servidor.getClientesConectados()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
