@@ -40,9 +40,13 @@ public class Cliente extends Observable {
 	public void registroServer(String ip, int port) throws IOException {
 		System.out.println("registra server");
 		this.socket = new Socket(ip, port);
+		System.out.println("crea socket");
 		this.entrada = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+		System.out.println("entrada");
 		this.salida = new PrintWriter(this.socket.getOutputStream(), true);
+		System.out.println("salida");
 		salida.println(this.user);
+		System.out.println("envia nombre");
 	}
 
 	public void IniciaHiloCliente() {
@@ -150,7 +154,8 @@ public class Cliente extends Observable {
 					}
 				} while (cadena != null);
 			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "Hubo un error al cambiar de servidor");
+				e.printStackTrace();
+				// JOptionPane.showMessageDialog(null, "Hubo un error al cambiar de servidor");
 			}
 		}).start();
 	}
