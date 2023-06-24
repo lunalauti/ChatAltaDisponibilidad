@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-
 import util.Constante;
 
 public class Monitor {
@@ -151,4 +150,9 @@ public class Monitor {
 			System.out.println("Ocurrio un problema en el cambio de servidor");
 		}
 	}
+
+	
+	
+	
+	
 }
