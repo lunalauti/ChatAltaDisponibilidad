@@ -65,7 +65,7 @@ public class ControladorServer implements ActionListener {
 
 	public void cambiarServer() {
 		try {
-			servidor.notificar("///// Establecido como nuevo servidor principal /////");
+			servidor.notificar("///// Establecido como nuevo servidor principal /////\n");
 			servidor.closeServer();
 			servidor.setServer(new ServerSocket(Constante.PUERTO_PRINCIPAL));
 			servidor.migrarDatos();

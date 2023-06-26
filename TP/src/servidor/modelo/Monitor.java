@@ -9,7 +9,12 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+
+import javax.swing.JOptionPane;
+
+import servidor.controlador.ControladorMonitor;
 import util.Constante;
+
 
 public class Monitor {
 
@@ -21,15 +26,21 @@ public class Monitor {
 	private ServerSocket serverSocket;
 	private ArrayList<Socket> clientes = new ArrayList<Socket>();
 	private static Monitor instance = null;
+	///Controlador y Vista
+	private ControladorMonitor controlador;
+
+	
 
 	public static void main(String[] args) {
-		Monitor.getInstance();
+		new ControladorMonitor();
 	}
 
-	private Monitor() {
+	private Monitor(ControladorMonitor controlador) {
 		try {
 			this.serverSocket = new ServerSocket(Constante.PUERTO_MONITOR);
 			System.out.println("Esperando servidores...");
+			this.controlador = controlador;
+			notificar("Esperando servidores...\n");
 			recibirClientes();
 			recibirServidores();
 		} catch (IOException e) {
@@ -38,9 +49,9 @@ public class Monitor {
 		}
 	}
 
-	public static Monitor getInstance() {
+	public static Monitor getInstance(ControladorMonitor controlador) {
 		if (instance == null)
-			instance = new Monitor();
+			instance = new Monitor(controlador);
 		return instance;
 	}
 
@@ -72,6 +83,8 @@ public class Monitor {
 					principal = this.serverSocket.accept();
 					salidaPrincipal = new PrintWriter(principal.getOutputStream(), true);
 					salidaPrincipal.println("1");
+					notificar("Se conecto un servidor principal\n");
+					this.controlador.cambiarPrincipal(true);
 					System.out.println("Servidor principal:\t Conectado");
 					serverActivo = 1;
 					recibirHeartbeat(principal);
@@ -79,13 +92,19 @@ public class Monitor {
 					this.secundario = this.serverSocket.accept();
 					salidaSecundario = new PrintWriter(this.secundario.getOutputStream(), true);
 					salidaSecundario.println("2");
+					notificar("Se conecto un servidor secundario\n");
+					this.controlador.cambiarSecundario(true);
 					System.out.println("Servidor secundario:\t Conectado");
 				}
 			} catch (SocketTimeoutException e) {
-				if (principal == null)
+				if (principal == null) {
 					System.out.println("[Timeout]\t-Reintentando conectar servidor principal...");
-				else
+					notificar("[Timeout]\t-Reintentando conectar servidor principal...\n");
+				}
+				else {
 					System.out.println("[Timeout]\t-Reintentando conectar servidor secundario...");
+					notificar("[Timeout]\t-Reintentando conectar servidor secundario...\n");
+				}
 				recibirServidores();
 			} catch (IOException e) {
 				if (!this.serverSocket.isClosed())
@@ -102,14 +121,21 @@ public class Monitor {
 				while (true) {
 					String idServer = entrada.readLine();
 					System.out.println("Servidor " + idServer + "\t disponible");
+					notificar("Servidor " + idServer + "\t disponible\n");
 				}
 			} catch (SocketTimeoutException | SocketException e) {
+				this.controlador.cambiarPrincipal(false);
 				System.out.println("Falla de server detectada");
+				notificar("Falla de server detectada\n");
 				if (secundario != null) {
+					notificar("////////Se establecio un nuevo servidor principal////////\n");
 					cambiarServer();
 					recibirHeartbeat(principal);
-				} else
+				} else {
 					System.out.println("No se encontro un servidor de respaldo :(");
+					this.principal = null;
+					notificar("No se encontro un servidor de respaldo :(\n");		
+				}
 				recibirServidores();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -137,8 +163,11 @@ public class Monitor {
 			PrintWriter salidaCliente;
 			principal = secundario;
 			secundario = null;
+			this.controlador.cambiarSecundario(false);
+			this.controlador.cambiarPrincipal(true);
 			salidaPrincipal = new PrintWriter(principal.getOutputStream(), true);
 			salidaPrincipal.println(Constante.COMANDO_CAMBIAR_SERVER);
+//			notificar("/////////////Se establecio un nuevo servidor principal/////////////");
 			Thread.sleep(2000);
 			for (Socket socket : clientes) {
 				System.out.println(socket);
@@ -148,11 +177,25 @@ public class Monitor {
 
 		} catch (IOException | InterruptedException e) {
 			System.out.println("Ocurrio un problema en el cambio de servidor");
+			notificar("Ocurrio un problema en el cambio de servidor\n");
 		}
 	}
+	
+	///Controlador y Vista
 
-	
-	
+
+	public ControladorMonitor getControlador() {
+		return controlador;
+	}
+
+	public void setControlador(ControladorMonitor controlador) {
+		this.controlador = controlador;
+	}
+
+	public void notificar(String notificacion) {
+		this.controlador.notificar(notificacion);
+	}
+
 	
 	
 }

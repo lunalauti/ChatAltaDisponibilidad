@@ -49,6 +49,7 @@ public class Servidor {
 	public void iniciarServidor() throws IOException {
 		conectarMonitor();
 		setID();
+		
 		server = (idServer == 1) ? new ServerSocket(Constante.PUERTO_PRINCIPAL)
 				: new ServerSocket(Constante.PUERTO_SECUNDARIO);
 	}
